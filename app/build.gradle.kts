@@ -54,6 +54,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.animation:animation")
     implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
+
     implementation("org.bouncycastle:bcprov-jdk15to18:1.77")
 
     debugImplementation("androidx.compose.ui:ui-tooling")
