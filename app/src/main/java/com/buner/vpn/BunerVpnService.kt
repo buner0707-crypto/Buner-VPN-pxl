@@ -11,9 +11,9 @@ import android.os.ParcelFileDescriptor
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import java.net.Socket
+import javax.net.ssl.SSLSocketFactory
 
 class BunerVpnService : VpnService() {
 
@@ -21,10 +21,10 @@ class BunerVpnService : VpnService() {
     private var running = false
 
     private val servers = listOf(
-        ServerInfo("Франция", "engage.cloudflareclient.com", 2408),
-        ServerInfo("Узбекистан", "engage.cloudflareclient.com", 2408),
-        ServerInfo("Эстония", "engage.cloudflareclient.com", 2408),
-        ServerInfo("Малайзия", "engage.cloudflareclient.com", 2408)
+        ServerInfo("Франция", "51.158.108.65", 443),
+        ServerInfo("Узбекистан", "51.158.108.65", 443),
+        ServerInfo("Эстония", "51.158.108.65", 443),
+        ServerInfo("Малайзия", "51.158.108.65", 443)
     )
 
     data class ServerInfo(
@@ -85,21 +85,27 @@ class BunerVpnService : VpnService() {
                         val inputStream = FileInputStream(vpnInterface!!.fileDescriptor)
                         val outputStream = FileOutputStream(vpnInterface!!.fileDescriptor)
 
-                        val tunnel = Socket()
+                        val sslFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
+                        val tunnel = sslFactory.createSocket()
                         tunnel.connect(InetSocketAddress(server.address, server.port), 5000)
+                        tunnel.startHandshake()
 
                         val buffer = ByteArray(32767)
                         while (running) {
-                            val read = inputStream.read(buffer)
-                            if (read > 0) {
-                                tunnel.getOutputStream().write(buffer, 0, read)
-                                tunnel.getOutputStream().flush()
-                            }
+                            try {
+                                val read = inputStream.read(buffer)
+                                if (read > 0) {
+                                    tunnel.getOutputStream().write(buffer, 0, read)
+                                    tunnel.getOutputStream().flush()
+                                }
 
-                            val tunnelRead = tunnel.getInputStream().read(buffer)
-                            if (tunnelRead > 0) {
-                                outputStream.write(buffer, 0, tunnelRead)
-                                outputStream.flush()
+                                val tunnelRead = tunnel.getInputStream().read(buffer)
+                                if (tunnelRead > 0) {
+                                    outputStream.write(buffer, 0, tunnelRead)
+                                    outputStream.flush()
+                                }
+                            } catch (_: Exception) {
+                                break
                             }
                         }
 
@@ -116,7 +122,9 @@ class BunerVpnService : VpnService() {
 
     private fun stopVPN() {
         running = false
-        vpnInterface?.close()
+        try {
+            vpnInterface?.close()
+        } catch (_: Exception) {}
         vpnInterface = null
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
