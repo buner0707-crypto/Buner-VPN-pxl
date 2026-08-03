@@ -1,3 +1,4 @@
+
 package com.buner.vpn
 
 import android.app.Notification
@@ -20,13 +21,10 @@ class BunerVpnService : VpnService() {
     private var running = false
 
     private val servers = listOf(
-            private val servers = listOf(
         ServerInfo("Франция", "45.32.45.123", 443),
         ServerInfo("Узбекистан", "185.213.155.45", 443),
         ServerInfo("Эстония", "185.165.29.145", 443),
         ServerInfo("Малайзия", "103.27.238.67", 443)
-    )
-
     )
 
     data class ServerInfo(
