@@ -1,4 +1,4 @@
-package com.buner.vpn
+vapackage com.buner.vpn
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -88,7 +88,6 @@ class BunerVpnService : VpnService() {
                         val sslFactory = SSLSocketFactory.getDefault() as SSLSocketFactory
                         val tunnel = sslFactory.createSocket()
                         tunnel.connect(InetSocketAddress(server.address, server.port), 5000)
-                        tunnel.startHandshake()
 
                         val buffer = ByteArray(32767)
                         while (running) {
